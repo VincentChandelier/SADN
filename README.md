@@ -19,7 +19,7 @@ Light field image becomes one of the most promising media types for immersive vi
 # Network
 
 # Evaluation Results
-.github https://github.com/VincentChandelier/SADN/blob/main/RDdata/PSNR-Hybrid.png
+.![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/PSNR-Hybrid.png)
 
 # Notes
 This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same and results are also consistent with original results. 
