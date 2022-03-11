@@ -12,7 +12,7 @@ Light field image becomes one of the most promising media types for immersive vi
    This code is based on the [CompressAI](https://github.com/InterDigitalInc/CompressAI)
 # Test Usage
    ```
-   python train.py --channels 48 --angRes 13 --n_blocks 1 --n_layers 1 train -d dataset  --batchsize 4 --patch-size 832 832 --lambda 0.003 -lr 1e-4 --epochs 100 --cuda --save
+   python train.py --channels 48 --angRes 13 --n_blocks 1 train -d dataset  --batchsize 4 --patch-size 832 832 --lambda 0.003 -lr 1e-4 --epochs 100 --cuda --save
    ```
    We will provide the checkpoint soon.
 
