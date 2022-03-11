@@ -32,7 +32,7 @@ from compressai.models.priors import JointAutoregressiveHierarchicalPriors
 from compressai.models.waseda import Cheng2020Attention
 
 class InterNet(nn.Module):
-    def __init__(self, channels, angRes, n_blocks, n_layers, analysis=True, *args, **kwargs):
+    def __init__(self, channels, angRes, n_blocks, analysis=True, *args, **kwargs):
         super(InterNet, self).__init__(*args, **kwargs)
         # Feature Extraction
         if analysis:
@@ -46,7 +46,7 @@ class InterNet(nn.Module):
             self.SpaFE = nn.Sequential(
                 nn.Conv2d(channels, channels, kernel_size=3, stride=1, dilation=int(angRes), padding=int(angRes), bias=False))
         # Spatial-Angular Interaction
-        self.CascadeInterBlock = CascadeInterBlock(angRes, n_blocks, n_layers, channels)
+        self.CascadeInterBlock = CascadeInterBlock(angRes, n_blocks, channels)
         # Fusion and Reconstruction
         self.BottleNeck = BottleNeck(angRes, n_blocks, channels)
 
@@ -84,32 +84,13 @@ class make_chains(nn.Module):
         return out_a, out_s
 
 
-class InterBlock(nn.Module):
-    def __init__(self, angRes, n_layers, channels):
-        super(InterBlock, self).__init__()
-        modules = []
-        self.n_layers = n_layers
-        for i in range(n_layers):
-            modules.append(make_chains(angRes, channels))
-        self.chained_layers = nn.Sequential(*modules)
-
-    def forward(self, xa, xs):
-        buffer_a = xa
-        buffer_s = xs
-        for i in range(self.n_layers):
-            buffer_a, buffer_s = self.chained_layers[i](buffer_a, buffer_s)
-        out_a = buffer_a
-        out_s = buffer_s
-        return out_a, out_s
-
-
 class CascadeInterBlock(nn.Module):
-    def __init__(self, angRes, n_blocks, n_layers, channels):
+    def __init__(self, angRes, n_blocks, channels):
         super(CascadeInterBlock, self).__init__()
         self.n_blocks = n_blocks
         body = []
         for i in range(n_blocks):
-            body.append(InterBlock(angRes, n_layers, channels))
+            body.append(make_chains(angRes, channels))
         self.body = nn.Sequential(*body)
     def forward(self, buffer_a, buffer_s):
         out_a = []
@@ -155,11 +136,11 @@ class LFContext(CompressionModel):
         N (int): Number of channels
     """
 
-    def __init__(self, N=48, M=LATENT_Depth, angRes=13, n_blocks=4, n_layers=1, **kwargs):
+    def __init__(self, N=48, M=LATENT_Depth, angRes=13, n_blocks=4, **kwargs):
         super().__init__(entropy_bottleneck_channels=N, **kwargs)
 
         self.g_a = nn.Sequential(
-            InterNet(N, angRes, n_blocks, n_layers),
+            InterNet(N, angRes, n_blocks),
             ResidualBlockWithStride(N, N, stride=2),
             ResidualBlock(N, N),
             ResidualBlockWithStride(N, N, stride=2),
@@ -210,7 +191,7 @@ class LFContext(CompressionModel):
             ResidualBlockUpsample(N, N, 2),
             ResidualBlock(N, N),
             subpel_conv3x3(N, N, 2),
-            InterNet(N, angRes, n_blocks, n_layers, analysis=False),
+            InterNet(N, angRes, n_blocks, analysis=False),
             conv3x3(N, 3),
         )
 
