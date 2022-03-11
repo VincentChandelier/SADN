@@ -181,9 +181,6 @@ def parse_args(argv):
         "--n_blocks", type=int, default=2,
         help="Setting the mber of the inter-blocks.")
     parser.add_argument(
-        "--n_layers", type=int, default=2,
-        help="Setting the number of the layers of inter-blocks.")
-    parser.add_argument(
         "-d", "--dataset", type=str, required=True, help="Training dataset"
     )
     parser.add_argument(
@@ -289,7 +286,7 @@ def main(argv):
         pin_memory=(device == "cuda"),
     )
 
-    net = LFContext(N=args.channels, angRes=args.angRes, n_blocks=args.n_blocks, n_layers=args.n_layers)
+    net = LFContext(N=args.channels, angRes=args.angRes, n_blocks=args.n_blocks)
     net = net.to(device)
     writer = SummaryWriter(args.dataset)
     if args.cuda and torch.cuda.device_count() > 1:
