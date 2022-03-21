@@ -41,7 +41,8 @@ Extraction code：a832)
    cd Code
    python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 100 -lr 1e-4 -n 20  --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id  0,1,2,3 --savepath   ./checkpoint
    ```
-   The training patches I used for training is available (https://pan.baidu.com/s/1ELZTgJq9JpSq0kzSCH1OUQ Extraction code：flc5)
+   The training patches I used for training is available (https://pan.baidu.com/s/1-nCg_zbSIVZZiiQ996LLTQ 
+Extraction code：zhto)
 ## Update the entropy model
 ```
    python updata.py checkpoint_path -n checkpoint
