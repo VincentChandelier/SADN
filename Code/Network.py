@@ -23,13 +23,21 @@ from compressai.ans import BufferedRansEncoder, RansDecoder
 
 from compressai.models.utils import update_registered_buffers
 
-LATENT_Depth = 64
 
 from compressai.layers import MaskedConv2d
 from compressai.models.priors import CompressionModel
 
 from compressai.models.priors import JointAutoregressiveHierarchicalPriors
 from compressai.models.waseda import Cheng2020Attention
+
+# From Balle's tensorflow compression examples
+SCALES_MIN = 0.11
+SCALES_MAX = 256
+SCALES_LEVELS = 64
+
+
+def get_scale_table(min=SCALES_MIN, max=SCALES_MAX, levels=SCALES_LEVELS):
+    return torch.exp(torch.linspace(math.log(min), math.log(max), levels))
 
 class InterNet(nn.Module):
     def __init__(self, channels, angRes, n_blocks, analysis=True, *args, **kwargs):
@@ -130,13 +138,13 @@ def get_scale_table(min=SCALES_MIN, max=SCALES_MAX, levels=SCALES_LEVELS):
     return torch.exp(torch.linspace(math.log(min), math.log(max), levels))
 
 
-class LFContext(CompressionModel):
+class SADN(CompressionModel):
     """
     Args:
         N (int): Number of channels
     """
 
-    def __init__(self, N=48, M=LATENT_Depth, angRes=13, n_blocks=4, **kwargs):
+    def __init__(self, N=48, M=48, angRes=13, n_blocks=1, **kwargs):
         super().__init__(entropy_bottleneck_channels=N, **kwargs)
 
         self.g_a = nn.Sequential(
@@ -215,6 +223,27 @@ class LFContext(CompressionModel):
     def downsampling_factor(self) -> int:
         return 2 ** (4 + 2)
 
+    def forward(self, x):
+        y = self.g_a(x)
+        z = self.h_a(y)
+        z_hat, z_likelihoods = self.entropy_bottleneck(z)
+        params = self.h_s(z_hat)
+        y_hat = self.gaussian_conditional.quantize(
+            y, "noise" if self.training else "dequantize"
+        )
+        ctx_params = self.context_prediction(y_hat)
+        gaussian_params = self.entropy_parameters(
+            torch.cat((params, ctx_params), dim=1)
+        )
+        scales_hat, means_hat = gaussian_params.chunk(2, 1)
+        y_hat, y_likelihoods = self.gaussian_conditional(y, scales_hat, means=means_hat)
+        x_hat = self.g_s(y_hat)
+
+        return {
+            "x_hat": x_hat,
+            "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
+        }
+
     def load_state_dict(self, state_dict):
         update_registered_buffers(
             self.gaussian_conditional,
@@ -227,9 +256,6 @@ class LFContext(CompressionModel):
     @classmethod
     def from_state_dict(cls, state_dict):
         """Return a new model instance from `state_dict`."""
-        # N = state_dict["g_a.1.conv1.weight"].size(0)
-        # M = LATENT_Depth
-        # net = cls(N, M)
         net = cls()
         net.load_state_dict(state_dict)
         return net
@@ -240,28 +266,6 @@ class LFContext(CompressionModel):
         updated = self.gaussian_conditional.update_scale_table(scale_table, force=force)
         updated |= super().update(force=force)
         return updated
-
-    def forward(self, x):
-        y = self.g_a(x)
-        z = self.h_a(y)
-        z_hat, z_likelihoods = self.entropy_bottleneck(z)
-        params = self.h_s(z_hat)
-
-        y_hat = self.gaussian_conditional.quantize(
-            y, "noise" if self.training else "dequantize"
-        )
-        ctx_params = self.context_prediction(y_hat)
-        gaussian_params = self.entropy_parameters(
-            torch.cat((params, ctx_params), dim=1)
-        )
-        scales_hat, means_hat = gaussian_params.chunk(2, 1)
-        _, y_likelihoods = self.gaussian_conditional(y, scales_hat, means=means_hat)
-        x_hat = self.g_s(y_hat)
-
-        return {
-            "x_hat": x_hat,
-            "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
-        }
 
     def compress(self, x):
         if next(self.parameters()).device != torch.device("cpu"):
@@ -290,8 +294,8 @@ class LFContext(CompressionModel):
         y_strings = []
         for i in range(y.size(0)):
             string = self._compress_ar(
-                y_hat[i : i + 1],
-                params[i : i + 1],
+                y_hat[i: i + 1],
+                params[i: i + 1],
                 y_height,
                 y_width,
                 kernel_size,
@@ -315,7 +319,7 @@ class LFContext(CompressionModel):
         masked_weight = self.context_prediction.weight * self.context_prediction.mask
         for h in range(height):
             for w in range(width):
-                y_crop = y_hat[:, :, h : h + kernel_size, w : w + kernel_size]
+                y_crop = y_hat[:, :, h: h + kernel_size, w: w + kernel_size]
                 ctx_p = F.conv2d(
                     y_crop,
                     masked_weight,
@@ -324,7 +328,7 @@ class LFContext(CompressionModel):
 
                 # 1x1 conv for the entropy parameters prediction network, so
                 # we only keep the elements in the "center"
-                p = params[:, :, h : h + 1, w : w + 1]
+                p = params[:, :, h: h + 1, w: w + 1]
                 gaussian_params = self.entropy_parameters(torch.cat((p, ctx_p), dim=1))
                 gaussian_params = gaussian_params.squeeze(3).squeeze(2)
                 scales_hat, means_hat = gaussian_params.chunk(2, 1)
@@ -377,8 +381,8 @@ class LFContext(CompressionModel):
         for i, y_string in enumerate(strings[0]):
             self._decompress_ar(
                 y_string,
-                y_hat[i : i + 1],
-                params[i : i + 1],
+                y_hat[i: i + 1],
+                params[i: i + 1],
                 y_height,
                 y_width,
                 kernel_size,
@@ -390,7 +394,7 @@ class LFContext(CompressionModel):
         return {"x_hat": x_hat}
 
     def _decompress_ar(
-        self, y_string, y_hat, params, height, width, kernel_size, padding
+            self, y_string, y_hat, params, height, width, kernel_size, padding
     ):
         cdf = self.gaussian_conditional.quantized_cdf.tolist()
         cdf_lengths = self.gaussian_conditional.cdf_length.tolist()
@@ -406,7 +410,7 @@ class LFContext(CompressionModel):
             for w in range(width):
                 # only perform the 5x5 convolution on a cropped tensor
                 # centered in (h, w)
-                y_crop = y_hat[:, :, h : h + kernel_size, w : w + kernel_size]
+                y_crop = y_hat[:, :, h: h + kernel_size, w: w + kernel_size]
                 ctx_p = F.conv2d(
                     y_crop,
                     self.context_prediction.weight,
@@ -414,7 +418,7 @@ class LFContext(CompressionModel):
                 )
                 # 1x1 conv for the entropy parameters prediction network, so
                 # we only keep the elements in the "center"
-                p = params[:, :, h : h + 1, w : w + 1]
+                p = params[:, :, h: h + 1, w: w + 1]
                 gaussian_params = self.entropy_parameters(torch.cat((p, ctx_p), dim=1))
                 scales_hat, means_hat = gaussian_params.chunk(2, 1)
 
@@ -427,15 +431,11 @@ class LFContext(CompressionModel):
 
                 hp = h + padding
                 wp = w + padding
-                y_hat[:, :, hp : hp + 1, wp : wp + 1] = rv
+                y_hat[:, :, hp: hp + 1, wp: wp + 1] = rv
 
 if __name__ == "__main__":
-    model = LFContext(N=48, angRes=13, n_blocks=1, n_layers=1)
-    # model = JointAutoregressiveHierarchicalPriors(192, 192)
-    # model = Cheng2020Attention(128)
+    model = SADN(N=48, M=48, angRes=13, n_blocks=1)
     input = torch.Tensor(1, 3, 832, 832)
-    # from torchvision import models
-    # model = models.resnet18()
     print(model)
     out = model(input)
     flops, params = get_model_complexity_info(model, ( 3, 832, 832), as_strings=True, print_per_layer_stat=True)
