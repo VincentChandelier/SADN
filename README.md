@@ -28,10 +28,20 @@ consists of 7549 LIs captured by Lytro Illum, which is much larger than the exis
    This code is based on the [CompressAI](https://github.com/InterDigitalInc/CompressAI)
 # Train Usage
    ```
-   python train.py --channels 48 --angRes 13 --n_blocks 1 train -d dataset  --batchsize 4 --patch-size 832 832 --lambda 0.003 -lr 1e-4 --epochs 100 --cuda --save
+   cd Code
+   python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 100 -lr 1e-4 -n 20  --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id  0,1,2,3 --savepath   ./checkpoint
    ```
    The training patches I used for training is available (https://pan.baidu.com/s/1ELZTgJq9JpSq0kzSCH1OUQ Extraction code：flc5)
+# Update the entropy Part
+```
+   python updata.py checkpoint_path -n checkpoint
+```
    We will provide the checkpoint soon.
+# Test 
+Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test
+```
+  python Inference.py --dataset/test --output_path Result_dir -p checkpoint_path
+```
 
 # Notes
 This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same and results are also consistent with original results. 
