@@ -63,3 +63,24 @@ If you think it is useful for your reseach, please cite our ICASSP2020 paper. Ou
   year={2022}
 }
 ```
+
+## EPLF dataset
+[EPLF](https://www.epfl.ch/labs/mmspg/downloads/epfl-light-field-image-dataset/)
+```
+@inproceedings{rerabek2016new,
+  title={New light field image dataset},
+  author={Rerabek, Martin and Ebrahimi, Touradj},
+  booktitle={8th International Conference on Quality of Multimedia Experience (QoMEX)},
+  number={CONF},
+  year={2016}
+}
+```
+## ICME 12 LF dataset
+```
+@article{rerabek2016icme,
+  title={Icme 2016 grand challenge: Light-field image compression},
+  author={Rerabek, Martin and Bruylants, Tim and Ebrahimi, Touradj and Pereira, Fernando and Schelkens, Peter},
+  journal={Call for proposals and evaluation procedure},
+  year={2016}
+}
+```
