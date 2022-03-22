@@ -57,8 +57,11 @@ Since the full test images are too large, I only upload a patch of the test imag
 # Notes
 This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same and results are also consistent with original results. 
 
-If you think it is useful for your reseach, please cite our ICASSP2020 paper. Our original RD data in the paper is contained in the folder RDdata/.
+Our original RD data in the paper is contained in the folder RDdata/.
 
+If you have any problem, please contact me: tkd20@mails.tsinghua.edu.cn
+
+If you think it is useful for your reseach, please cite our ICASSP2020 paper. 
 ```
 @article{tong2022sadn,
   title={SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation},
