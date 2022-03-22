@@ -17,12 +17,13 @@ consists of 7549 LIs captured by Lytro Illum, which is much larger than the exis
 
 [The central-SAIs and registered depth maps](https://cloud.tsinghua.edu.cn/d/d47ad68552ec408eac94/  ) are available for previewing.
 
-The raw Light field Images is available to download. (https://pan.baidu.com/s/1ebpt2K6F7-DOB42_Y2ZaDg Extraction code：d4l8)
+The raw light field images supposed to be decoded by LFtoolbox are available to download. (https://pan.baidu.com/s/1ebpt2K6F7-DOB42_Y2ZaDg Extraction code：d4l8)
 
-The decoding code with LFtoolbox0.4 and  related camera parameters is available to download.(https://pan.baidu.com/s/1DsTL2ftKBrnp-nKnJQkilQ  Extraction code：5nxt)
-If you want to explore the PINet or to produces your own training data, please follow the readme in the folder. 
+The decoding code with LFtoolbox0.4 and related camera parameters is available to download. (https://pan.baidu.com/s/1DsTL2ftKBrnp-nKnJQkilQ  Extraction code：5nxt)
 
-For testing, the light field raw images and macro-images are provided. (https://pan.baidu.com/s/1JLv5oAax8j9xrzqFEY5__Q 
+If you want to explore the PINet or to produce your own training data, please follow the readme in the folder. 
+
+For testing, the light field raw images and macro images are provided. (https://pan.baidu.com/s/1JLv5oAax8j9xrzqFEY5__Q 
 Extraction code：a832)
 
 
