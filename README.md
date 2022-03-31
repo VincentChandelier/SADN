@@ -62,7 +62,7 @@ Our original RD data in the paper is contained in the folder RDdata/.
 
 If you have any problem, please contact me: tkd20@mails.tsinghua.edu.cn
 
-If you think it is useful for your reseach, please cite our ICASSP2020 paper. 
+If you think it is useful for your reseach, please cite our ICASSP2022 paper. 
 ```
 @article{tong2022sadn,
   title={SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation},
