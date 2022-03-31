@@ -105,60 +105,55 @@ def inference(model, x, f, outputpath, patch):
     imgPath = '/'.join(imgpath)
     csvfile = '/'.join(imgpath[:-1]) + '/result.csv'
     print('decoding img: {}'.format(f))
-# ########original padding
-#     h, w = x.size(2), x.size(3)
-#     p = patch  # maximum 6 strides of 2
-#     new_h = (h + p - 1) // p * p
-#     new_w = (w + p - 1) // p * p
-#     padding_left = 0
-#     padding_right = new_w - w - padding_left
-#     padding_top = 0
-#     padding_bottom = new_h - h - padding_top
-#     x_padded = F.pad(
-#         x,
-#         (padding_left, padding_right, padding_top, padding_bottom),
-#         mode="constant",
-#         value=0,
-#     )
-####### ReplicationPad2d
+########original padding
     h, w = x.size(2), x.size(3)
-    p = 832  # maximum 6 strides of 2
+    p = patch  # maximum 6 strides of 2
     new_h = (h + p - 1) // p * p
     new_w = (w + p - 1) // p * p
     padding_left = 0
     padding_right = new_w - w - padding_left
     padding_top = 0
     padding_bottom = new_h - h - padding_top
-    pad = nn.ReplicationPad2d(padding=(padding_left, padding_right, padding_top, padding_bottom))
-    x_padded = pad(x)
-
+    x_padded = F.pad(
+        x,
+        (padding_left, padding_right, padding_top, padding_bottom),
+        mode="constant",
+        value=0,
+    )
     _, _, height, width = x_padded.size()
     x_padded = img_window_partition(x_padded, p)
-    start = time.time()
-    out_enc = model.compress(x_padded)
-    enc_time = time.time() - start
+    B, _, _, _ = x_padded.size()
+    Rec = torch.zeros_like(x_padded)
+    enc_time = 0
+    dec_time = 0
+    bpp = 0
+    for i in range(B):
+        start = time.time()
+        out_enc = model.compress(x_padded[i:i+1, :, :, :])
+        enc_time += time.time() - start
 
-    start = time.time()
-    out_dec = model.decompress(out_enc["strings"], out_enc["shape"])
-    dec_time = time.time() - start
+        start = time.time()
+        out_dec = model.decompress(out_enc["strings"], out_enc["shape"])
+        dec_time += time.time() - start
+        for s in out_enc["strings"]:
+            for j in s:
+                bpp += len(j)
+        Rec[i:i+1, :, :, :] = out_dec["x_hat"]
 
-    out_dec["x_hat"] = img_window_reverse(out_dec["x_hat"], p, height, width)  # 反变换(N,C,Hpatch,Wpatch)->（1,C,H,W)
-    out_dec["x_hat"] = F.pad(
-        out_dec["x_hat"], (-padding_left, -padding_right, -padding_top, -padding_bottom)
+    Rec = img_window_reverse(Rec, p, height, width)  # 反变换(N,C,Hpatch,Wpatch)->（1,C,H,W)
+    Rec = F.pad(
+        Rec, (-padding_left, -padding_right, -padding_top, -padding_bottom)
     )
 
     num_pixels = x.size(0) * x.size(2) * x.size(3)
-    bpp = 0
-    for s in out_enc["strings"]:
-        for j in s:
-            bpp += len(j)
+
     bpp *= 8.0 / num_pixels  # 计算bpp
 
-    torchvision.utils.save_image(out_dec["x_hat"], imgPath, nrow=1)
-    PSNR = psnr(x, out_dec["x_hat"])
+    torchvision.utils.save_image(Rec, imgPath, nrow=1)
+    PSNR = psnr(x, Rec)
     with open(csvfile, 'a+') as f:
-        row = [imgpath[-1], bpp * num_pixels, num_pixels, bpp, F.mse_loss(x, out_dec["x_hat"]).item()*255**2,
-               psnr(x, out_dec["x_hat"]), enc_time, dec_time]
+        row = [imgpath[-1], bpp * num_pixels, num_pixels, bpp, F.mse_loss(x, Rec).item()*255**2,
+               PSNR, enc_time, dec_time]
         write = csv.writer(f)
         write.writerow(row)
     print('bpp:{}, PSNR: {}, encoding time: {}, decoding time: {}'.format(bpp, PSNR, enc_time, dec_time))
@@ -171,7 +166,6 @@ def inference(model, x, f, outputpath, patch):
 
 @torch.no_grad()
 def inference_entropy_estimation(model, x, f, outputpath, patch):
-    x = x[:, :1920, :3072]
     x = x.unsqueeze(0)
     imgpath = f.split('/')
     imgpath[-2] = outputpath
@@ -183,9 +177,9 @@ def inference_entropy_estimation(model, x, f, outputpath, patch):
     p = patch  # maximum 6 strides of 2
     new_h = (h + p - 1) // p * p
     new_w = (w + p - 1) // p * p
-    padding_left = (new_w - w) // 2
+    padding_left = 0
     padding_right = new_w - w - padding_left
-    padding_top = (new_h - h) // 2
+    padding_top = 0
     padding_bottom = new_h - h - padding_top
     x_padded = F.pad(
         x,
@@ -195,30 +189,34 @@ def inference_entropy_estimation(model, x, f, outputpath, patch):
     )
     _, _, height, width = x_padded.size()
     x_padded = img_window_partition(x_padded, p)
-
+    B, _, _, _ = x_padded.size()
+    Rec = torch.zeros_like(x_padded)
+    bpp = 0
+    num_pixels = x.size(0) * x.size(2) * x.size(3)
     start = time.time()
-    out_net = model.forward(x_padded)
-
-    out_net["x_hat"] = img_window_reverse(out_net["x_hat"], p, height, width)  # 反变换(N,C,Hpatch,Wpatch)->（1,C,H,W)
+    for i in range(B):
+        out_net = model.forward(x_padded[i:i + 1, :, :, :])
+        Rec[i:i + 1, :, :, :] = out_net["x_hat"]
+        bpp += sum(
+            (torch.log(likelihoods).sum() / (-math.log(2) * num_pixels))
+            for likelihoods in out_net["likelihoods"].values()
+        )
 
     elapsed_time = time.time() - start
-    out_net["x_hat"] = F.pad(
-        out_net["x_hat"], (-padding_left, -padding_right, -padding_top, -padding_bottom)
+    Rec = img_window_reverse(Rec, p, height, width)  # 反变换(N,C,Hpatch,Wpatch)->（1,C,H,W)
+    Rec = F.pad(
+        Rec, (-padding_left, -padding_right, -padding_top, -padding_bottom)
     )
-    num_pixels = x.size(0) * x.size(2) * x.size(3)
-    bpp = sum(
-        (torch.log(likelihoods).sum() / (-math.log(2) * num_pixels))
-        for likelihoods in out_net["likelihoods"].values()
-    )
-    torchvision.utils.save_image(out_net["x_hat"], imgPath, nrow=1)
-    PSNR = psnr(x, out_net["x_hat"])
+
+    torchvision.utils.save_image(Rec, imgPath, nrow=1)
+    PSNR = psnr(x, Rec)
     with open(csvfile, 'a+') as f:
-        row = [imgpath[-1], bpp.item() * num_pixels, num_pixels, bpp.item(), F.mse_loss(x, out_net["x_hat"]).item() * 255 ** 2,
-            psnr(x, out_net["x_hat"]), elapsed_time / 2.0, elapsed_time / 2.0]
+        row = [imgpath[-1], bpp.item() * num_pixels, num_pixels, bpp.item(), F.mse_loss(x, Rec).item() * 255 ** 2,
+            PSNR, elapsed_time / 2.0, elapsed_time / 2.0]
         write = csv.writer(f)
         write.writerow(row)
     return {
-        "psnr": psnr(x, out_net["x_hat"]),
+        "psnr": PSNR,
         "bpp": bpp.item(),
         "encoding_time": elapsed_time / 2.0,  # broad estimation
         "decoding_time": elapsed_time / 2.0,
@@ -337,7 +335,6 @@ def main(argv):
         "entropy estimation" if args.entropy_estimation else args.entropy_coder
     )
     output = {
-        "name": args.model,
         "description": f"Inference ({description})",
         "results": results,
     }
