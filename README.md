@@ -49,21 +49,20 @@ Extraction code: uwrx)
 ```
    python updata.py checkpoint_path -n checkpoint
 ```
-   We will provide the checkpoint soon.
 ## Test 
-Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test
+Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test. I re-trained the re-implementation algorithm in PyTorch with lambda=0.003, and the checkpoint is saved as the Code/checkpoint.pth.tar. In our original training stage, the algorithm was trained for 100 epochs, the provided checkpoint is only trained for 25 epochs since the re-training time is too long to wait. The checkpoint is provided to explain all the steps in our implementations.
 ```
-  python Inference.py --dataset/test --output_path Result_dir -p checkpoint_path
+  python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.tar
 ```
 
 # Notes
-This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same and results are also consistent with original results. 
+This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same. 
 
 Our original RD data in the paper is contained in the folder RDdata/.
 
 If you have any problem, please contact me: tkd20@mails.tsinghua.edu.cn
 
-If you think it is useful for your reseach, please cite our ICASSP2020 paper. 
+If you think it is useful for your reseach, please cite our ICASSP2022 paper. 
 ```
 @article{tong2022sadn,
   title={SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation},
