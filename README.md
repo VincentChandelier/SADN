@@ -5,7 +5,7 @@
 Kedeng Tong, Xin Jin, Chen Wang, Fan Jiang 
 
 [Poster](https://drive.google.com/file/d/1HCDC7KsgLDEpkr0ZjK7UcliMVnwWK5v0/view?usp=sharing) is available.
-[Video presentation](https://drive.google.com/file/d/18-lm0xE4gofmfLGLOyv5mW2XAPV87WaQ/view?usp=sharing) is availabel.
+[Video presentation](https://drive.google.com/file/d/18-lm0xE4gofmfLGLOyv5mW2XAPV87WaQ/view?usp=sharing) is available.
 
 # Paper Summury:
 Light field image becomes one of the most promising media types for immersive video applications. In this paper, we propose a novel end-to-end spatial-angular-decorrelated network (SADN) for high-efficiency light field image compression. Different from the existing methods that exploit either spatial or angular consistency in the light field image, SADN decouples the angular and spatial information by dilation convolution and stride convolution in spatialangular interaction, and performs feature fusion to compress spatial and angular information jointly. To train a stable and robust algorithm, a large-scale dataset consisting of 7549 light field images is proposed and built. The proposed method provides 2.137 times and 2.849 times higher compression efficiency relative to H.266/VVC and H.265/HEVC inter coding, respectively. It also outperforms the end-to-end image compression networks by an average of 79.6% bitrate saving with much higher subjective quality and light field consistency. 
@@ -69,11 +69,13 @@ If you have any problem, please contact me: tkd20@mails.tsinghua.edu.cn
 
 If you think it is useful for your reseach, please cite our ICASSP2022 paper. 
 ```
-@article{tong2022sadn,
+@inproceedings{tong2022sadn,
   title={SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation},
   author={Tong, Kedeng and Jin, Xin and Wang, Chen and Jiang, Fan},
-  journal={arXiv preprint arXiv:2202.10837},
-  year={2022}
+  booktitle={ICASSP 2022-2022 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  pages={1870--1874},
+  year={2022},
+  organization={IEEE}
 }
 ```
 
