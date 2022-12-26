@@ -40,13 +40,15 @@ Extraction code：a832)
 
 ## Environment
    This code is based on the [CompressAI](https://github.com/InterDigitalInc/CompressAI).
+   ```
+   pip install compressai==1.1.5
+   ```
 ## Train Usage
    ```
    cd Code
    python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 100 -lr 1e-4 -n 20  --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id  0,1,2,3 --savepath   ./checkpoint
    ```
-   The training patches I used for training is available (https://pan.baidu.com/s/1hxWIrOC7ldIYV6zOzYIGpA 
-Extraction code: uwrx)
+   The training patches I used for training is available (https://pan.baidu.com/s/1w-9E4lXf6UbBCTmkkgqiiw?pwd=3ciu access code：3ciu)
 
 ## Update the entropy model
 ```
