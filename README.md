@@ -1,6 +1,6 @@
 # SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation 
   This repository contains the code for reproducing the results with trained models, in the following paper:
-  Official code o f paper：[SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation.arxiv](https://arxiv.org/abs/2202.10837), ICASSP 2020
+  Official code o f paper：[SADN: Learned Light Field Image Compression with Spatial-Angular Decorrelation.arxiv](https://arxiv.org/abs/2202.10837), ICASSP 2022
   
 Kedeng Tong, Xin Jin, Chen Wang, Fan Jiang 
 
@@ -66,6 +66,13 @@ python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.ta
 This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same. 
 
 Our original RD data in the paper is contained in the folder RDdata/.
+
+Since our original proposed method is trained on Nvidia V100, Tensorflow 2.4, we retrained our algorithm on Nvidia RTX3090, pytorch 2.3.
+The retrained results are solved in [./RDdata/SADN_Pytorch_RTX3090.txt](https://github.com/VincentChandelier/SADN/blob/main/RDdata/SADN_Pytorch_RTX3090.txt).
+
+
+The Retrained Evaluation Results
+.![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RTX3090_result.png)
 
 If you have any problem, please contact me: tkd20@mails.tsinghua.edu.cn
 
