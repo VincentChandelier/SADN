@@ -63,13 +63,12 @@ python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.ta
 ```
 
 # Notes
-This implementations are not original codes of our ICASSP2022 paper, because original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same. 
-
-Our original RD data in the paper is contained in the folder RDdata/.
-
-Since our original proposed method is trained on Nvidia V100, Tensorflow 2.4, we retrained our algorithm on Nvidia RTX3090, pytorch 2.3.
-The retrained results are solved in [./RDdata/SADN_Pytorch_RTX3090.txt](https://github.com/VincentChandelier/SADN/blob/main/RDdata/SADN_Pytorch_RTX3090.txt).
-
+This implementation is not the original code of our ICASSP2022 paper, because the original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same. 
+## original RD data
+Our original RD data in the paper is contained in the folder ./RDdata/.
+## Retrained RD data
+Since our original proposed method is trained on Nvidia V100, Tensorflow 2.4, we retrained our algorithm on Nvidia RTX3090, PyTorch 2.3 using lambda belonging to {0.0001, 0.00015, 0.0003, 0.0006, 0.001, 0.003} for comparison.
+The retrained results are saved in [./RDdata/SADN_Pytorch_RTX3090.txt](https://github.com/VincentChandelier/SADN/blob/main/RDdata/SADN_Pytorch_RTX3090.txt).
 
 The Retrained Evaluation Results
 .![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RTX3090_result.png)
