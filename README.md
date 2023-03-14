@@ -29,6 +29,7 @@ If you want to explore the PINet or to produce your own training data, please fo
 For testing, the light field raw images and macro images are provided. (https://pan.baidu.com/s/1JLv5oAax8j9xrzqFEY5__Q 
 Extraction code：a832)
 
+The training patches I used for training is available (链接：https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow access code：0uow)
 
 # Network
 .![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/Network.png)
@@ -48,7 +49,7 @@ Extraction code：a832)
    cd Code
    python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 100 -lr 1e-4 -n 20  --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id  0,1,2,3 --savepath   ./checkpoint
    ```
-   The training patches I used for training is available (https://pan.baidu.com/s/1w-9E4lXf6UbBCTmkkgqiiw?pwd=3ciu access code：3ciu)
+   The training patches I used for training is available (链接：https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow access code：0uow)
 
 ## Update the entropy model
 ```
@@ -66,7 +67,7 @@ python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.ta
 This implementation is not the original code of our ICASSP2022 paper, because the original code is based on Tensorflow 2.4.0 and many features have been removed. This repo is a re-implementation, but the core codes are almost the same. 
 ## original RD data
 Our original RD data in the paper is contained in the folder ./RDdata/.
-## Retrained RD data
+## Retrained RD data (There are some wrong RD points, we will updata soon)
 Since our original proposed method is trained on Nvidia V100, Tensorflow 2.4, we retrained our algorithm on Nvidia RTX3090, PyTorch 2.3 using lambda belonging to {0.0001, 0.00015, 0.0003, 0.0006, 0.001, 0.003} for comparison.
 The retrained results are saved in [./RDdata/SADN_Pytorch_RTX3090.txt](https://github.com/VincentChandelier/SADN/blob/main/RDdata/SADN_Pytorch_RTX3090.txt).
 
