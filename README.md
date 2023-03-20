@@ -72,7 +72,7 @@ Since our original proposed method is trained on Nvidia V100, Tensorflow 2.4, we
 The retrained results are saved in [./RDdata/SADN_Pytorch_RTX3090.txt](https://github.com/VincentChandelier/SADN/blob/main/RDdata/SADN_Pytorch_RTX3090.txt).
 
 The Retrained Evaluation Results
-.![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RTX3090_result.png)
+.![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RTX3090_Result.png)
 
 If you have any problem, please contact me: tkd20@mails.tsinghua.edu.cn
 
