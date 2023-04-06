@@ -14,6 +14,7 @@ Light field image becomes one of the most promising media types for immersive vi
  Data |  Link                                                                                              |
 | ----|---------------------------------------------------------------------------------------------------|
 | PINet | [PINet](https://pan.baidu.com/s/1RqEZFrR1Kt4BFCd1hX6iSA?pwd=12t5)    |
+| Packaged  PINet | [Packaged](https://pan.baidu.com/s/1RqEZFrR1Kt4BFCd1hX6iSA?pwd=12t5)    |
 | PINet central SAIs and registered depth maps| [PINet central SAIs and registered depth maps](https://pan.baidu.com/s/1gIf1liNR47PtdDyUbrexHQ?pwd=mcr6)     |
 | LFtoolbox0.4 | [LFtoolbox0.4](https://pan.baidu.com/s/1HdzENydi1WKvJ0jL6wS2TA?pwd=v0xj) |
 | Training patches | [Training patches](https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow)    |
