@@ -1,0 +1,1 @@
+ python3 Inference.py --dataset ./dataset/Fulltest --s 2 --output_path SADNSTE -p ./Proposed_STE__28_checkpoint.pth.tar --patch 832 --factormode 0 --factor 0.1

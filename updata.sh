@@ -1,0 +1,1 @@
+python updata.py ./STEcheckpoint/checkpoint_best_loss_4.pth.tar -n STE_checkpoint
