@@ -42,15 +42,14 @@ Extraction code：a832)
 
 The training patches I used for training is available (https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow access code：0uow)
 
-# Network
+# SADN
+## Network
 .![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/Network.png)
 
-# Evaluation Results
-.![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RD.png)
 
-#Usage
+## Usage
 This code is based on the [CompressAI](https://github.com/InterDigitalInc/CompressAI).
-## Installation
+### Installation
   
    ```
    conda create -n SADN python=3.8
@@ -60,24 +59,27 @@ This code is based on the [CompressAI](https://github.com/InterDigitalInc/Compre
    pip install ptflops
    pip install tensorboardX
    ```
-## Train Usage
+### Train Usage
    ```
    cd Code
    python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 100 -lr 1e-4 -n 20  --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id  0,1,2,3 --savepath   ./checkpoint
    ```
    The training patches I used for training is available (https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow access code：0uow)
 
-## Update the entropy model
+### Update the entropy model
 ```
 python updata.py checkpoint_path -n checkpoint
 ```
-## Test 
+### Test 
 Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test. I re-trained the re-implementation algorithm in PyTorch with lambda=0.003, and the checkpoint is saved as the Code/checkpoint.pth.tar. 
 
 In our original training stage, the algorithm was trained for 100 epochs, the provided checkpoint is only trained for 25 epochs since the re-training time is too long to wait. The checkpoint is provided to explain all the steps in our implementations.
 ```
 python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.tar
 ```
+
+## Evaluation Results
+.![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RD.png)
 
 # Notes
 This implementation is not the original code of our ICASSP2022 paper, because the original code is based on Tensorflow 2.4.0 wihch many features have been removed in the latest tensorflow version. This repo is a re-implementation, but the core codes are the same. 
