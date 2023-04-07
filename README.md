@@ -49,11 +49,16 @@ The training patches I used for training is available (https://pan.baidu.com/s/1
 .![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RD.png)
 
 #Usage
-
-## Environment
-   This code is based on the [CompressAI](https://github.com/InterDigitalInc/CompressAI).
+This code is based on the [CompressAI](https://github.com/InterDigitalInc/CompressAI).
+## Installation
+  
    ```
+   conda create -n SADN python=3.8
+   conda activate SADN
    pip install compressai==1.1.5
+   pip install thop
+   pip install ptflops
+   pip install tensorboardX
    ```
 ## Train Usage
    ```
