@@ -29,7 +29,6 @@ from compressai.models.priors import CompressionModel
 
 from compressai.models.priors import JointAutoregressiveHierarchicalPriors
 from compressai.models.waseda import Cheng2020Attention
-
 # From Balle's tensorflow compression examples
 SCALES_MIN = 0.11
 SCALES_MAX = 256
@@ -38,6 +37,22 @@ SCALES_LEVELS = 64
 
 def get_scale_table(min=SCALES_MIN, max=SCALES_MAX, levels=SCALES_LEVELS):
     return torch.exp(torch.linspace(math.log(min), math.log(max), levels))
+
+def ste_round(x: Tensor) -> Tensor:
+    """
+    Rounding with non-zero gradients. Gradients are approximated by replacing
+    the derivative by the identity function.
+
+    Used in `"Lossy Image Compression with Compressive Autoencoders"
+    <https://arxiv.org/abs/1703.00395>`_
+
+    .. note::
+
+        Implemented with the pytorch `detach()` reparametrization trick:
+
+        `x_round = x_round - x.detach() + x`
+    """
+    return torch.round(x) - x.detach() + x
 
 class InterNet(nn.Module):
     def __init__(self, channels, angRes, n_blocks, analysis=True, *args, **kwargs):
@@ -223,26 +238,70 @@ class SADN(CompressionModel):
     def downsampling_factor(self) -> int:
         return 2 ** (4 + 2)
 
-    def forward(self, x):
-        y = self.g_a(x)
-        z = self.h_a(y)
-        z_hat, z_likelihoods = self.entropy_bottleneck(z)
-        params = self.h_s(z_hat)
-        y_hat = self.gaussian_conditional.quantize(
-            y, "noise" if self.training else "dequantize"
-        )
-        ctx_params = self.context_prediction(y_hat)
-        gaussian_params = self.entropy_parameters(
-            torch.cat((params, ctx_params), dim=1)
-        )
-        scales_hat, means_hat = gaussian_params.chunk(2, 1)
-        y_hat, y_likelihoods = self.gaussian_conditional(y, scales_hat, means=means_hat)
-        x_hat = self.g_s(y_hat)
+    def forward(self, x, ste):
+        if not ste:
+            y = self.g_a(x)
+            z = self.h_a(y)
+            z_hat, z_likelihoods = self.entropy_bottleneck(z)
+            params = self.h_s(z_hat)
+            y_hat = self.gaussian_conditional.quantize(
+                y, "noise" if self.training else "dequantize"
+            )
+            ctx_params = self.context_prediction(y_hat)
+            gaussian_params = self.entropy_parameters(
+                torch.cat((params, ctx_params), dim=1)
+            )
+            scales_hat, means_hat = gaussian_params.chunk(2, 1)
+            y_hat, y_likelihoods = self.gaussian_conditional(y, scales_hat, means=means_hat)
+            x_hat = self.g_s(y_hat)
+        else:
+            y = self.g_a(x)
+            z = self.h_a(y)
+            _, z_likelihoods = self.entropy_bottleneck(z)
+
+            z_offset = self.entropy_bottleneck._get_medians()
+            z_tmp = z - z_offset
+            z_hat = ste_round(z_tmp) + z_offset
+
+            params = self.h_s(z_hat)
+            kernel_size = 5  # context prediction kernel size
+            padding = (kernel_size - 1) // 2
+            y_hat = F.pad(y, (padding, padding, padding, padding))
+            y_hat, y_likelihoods = self._stequantization(y_hat, params, y.size(2), y.size(3), kernel_size, padding)
+
+            x_hat = self.g_s(y_hat)
 
         return {
             "x_hat": x_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
+
+    def _stequantization(self, y_hat, params, height, width, kernel_size, padding):
+        y_likelihoods = torch.zeros([y_hat.size(0), y_hat.size(1), height, width]).to(y_hat.device)
+        # TODO: profile the calls to the bindings...
+        masked_weight = self.context_prediction.weight * self.context_prediction.mask
+        for h in range(height):
+            for w in range(width):
+                y_crop = y_hat[:, :, h: h + kernel_size, w: w + kernel_size].clone()
+                ctx_p = F.conv2d(
+                    y_crop,
+                    masked_weight,
+                    bias=self.context_prediction.bias,
+                )
+                # 1x1 conv for the entropy parameters prediction network, so
+                # we only keep the elements in the "center"
+                p = params[:, :, h: h + 1, w: w + 1]
+                gaussian_params = self.entropy_parameters(torch.cat((p, ctx_p), dim=1))
+                gaussian_params = gaussian_params.squeeze(3).squeeze(2)
+                scales_hat, means_hat = gaussian_params.chunk(2, 1)
+                y_crop = y_crop[:, :, padding, padding]
+                _, y_likelihoods[:, :, h: h + 1, w: w + 1] = self.gaussian_conditional(
+                    (y_crop - means_hat).unsqueeze(2).unsqueeze(3),
+                    (scales_hat).unsqueeze(2).unsqueeze(3))
+                y_q = ste_round(y_crop - means_hat.detach()) + means_hat.detach()
+                y_hat[:, :, h + padding, w + padding] = y_q
+        y_hat = F.pad(y_hat, (-padding, -padding, -padding, -padding))
+        return y_hat, y_likelihoods
 
     def load_state_dict(self, state_dict):
         update_registered_buffers(

@@ -171,7 +171,7 @@ def configure_optimizers(net, args):
 
 
 def train_one_epoch(
-    model, criterion, train_dataloader, optimizer, aux_optimizer, epoch, clip_max_norm
+    model, criterion, train_dataloader, optimizer, aux_optimizer, epoch, clip_max_norm, ste
 ):
     model.train()
     device = next(model.parameters()).device
@@ -185,7 +185,7 @@ def train_one_epoch(
         optimizer.zero_grad()
         aux_optimizer.zero_grad()
 
-        out_net = model(d)
+        out_net = model(d, ste)
 
         out_criterion = criterion(out_net, d)
         train_bpp_loss.update(out_criterion["bpp_loss"].item())
@@ -220,7 +220,7 @@ def train_one_epoch(
 
     return train_loss.avg, train_bpp_loss.avg, train_mse_loss.avg
 
-def test_epoch(epoch, test_dataloader, model, criterion):
+def test_epoch(epoch, test_dataloader, model, criterion, ste):
     model.eval()
     device = next(model.parameters()).device
 
@@ -232,7 +232,7 @@ def test_epoch(epoch, test_dataloader, model, criterion):
     with torch.no_grad():
         for d in test_dataloader:
             d = d.to(device)
-            out_net = model(d)
+            out_net = model(d, ste)
             out_criterion = criterion(out_net, d)
 
             aux_loss.update(model.aux_loss())
@@ -241,6 +241,7 @@ def test_epoch(epoch, test_dataloader, model, criterion):
             mse_loss.update(out_criterion["mse_loss"])
 
     print(
+        f"lambda: {criterion.lmbda}, "
         f"Test epoch {epoch}: Average losses:"
         f"\tLoss: {loss.avg:.3f} |"
         f"\tMSE loss: {mse_loss.avg:.3f} |"
@@ -348,6 +349,7 @@ def parse_args(argv):
     parser.add_argument('--gpu-id', default='1', type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--savepath', default='./checkpoint', type=str, help='Path to save the checkpoint')
     parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")
+    parser.add_argument("--ste", default=0, type=int, help="Using ste round in the finetune stage")
     args = parser.parse_args(argv)
     return args
 
@@ -423,6 +425,8 @@ def main(argv):
         aux_optimizer.param_groups[0]['lr'] = args.aux_learning_rate
         last_epoch = 0
 
+    ste = False if args.ste==0 else True
+
     best_loss = float("inf")
     for epoch in range(last_epoch, args.epochs):
         print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
@@ -434,12 +438,13 @@ def main(argv):
             aux_optimizer,
             epoch,
             args.clip_max_norm,
+            ste,
         )
         writer.add_scalar('Train/loss', train_loss, epoch)
         writer.add_scalar('Train/mse', train_mse, epoch)
         writer.add_scalar('Train/bpp', train_bpp, epoch)
 
-        loss, bpp, mse = test_epoch(epoch, test_dataloader, net, criterion)
+        loss, bpp, mse = test_epoch(epoch, test_dataloader, net, criterion, ste)
         writer.add_scalar('Test/loss', loss, epoch)
         writer.add_scalar('Test/mse', mse, epoch)
         writer.add_scalar('Test/bpp', bpp, epoch)
