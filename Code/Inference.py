@@ -153,7 +153,7 @@ def inference(model, x, f, outputpath, patch):
     PSNR = psnr(x, Rec)
     with open(csvfile, 'a+') as f:
         row = [imgpath[-1], bpp * num_pixels, num_pixels, bpp, F.mse_loss(x, Rec).item()*255**2,
-               PSNR, enc_time, dec_time]
+               PSNR,  ms_ssim(x, Rec, data_range=1.0).item(), enc_time, dec_time]
         write = csv.writer(f)
         write.writerow(row)
     print('bpp:{}, PSNR: {}, encoding time: {}, decoding time: {}'.format(bpp, PSNR, enc_time, dec_time))
@@ -212,7 +212,7 @@ def inference_entropy_estimation(model, x, f, outputpath, patch):
     PSNR = psnr(x, Rec)
     with open(csvfile, 'a+') as f:
         row = [imgpath[-1], bpp.item() * num_pixels, num_pixels, bpp.item(), F.mse_loss(x, Rec).item() * 255 ** 2,
-            PSNR, elapsed_time / 2.0, elapsed_time / 2.0]
+            PSNR,  ms_ssim(x, Rec, data_range=1.0).item(), elapsed_time / 2.0, elapsed_time / 2.0]
         write = csv.writer(f)
         write.writerow(row)
     return {
@@ -235,7 +235,7 @@ def eval_model(model, filepaths, entropy_estimation=False, half=False, outputpat
     if os.path.isfile(csvfile):
         os.remove(csvfile)
     with open(csvfile, 'w') as f:
-        row = ['name', 'bits', 'pixels', 'bpp', 'mse', 'psnr', 'enc_time', 'dec_time']
+        row = ['name', 'bits', 'pixels', 'bpp', 'mse', 'psnr(dB)', 'ms-ssim', 'enc_time', 'dec_time']
         write = csv.writer(f)
         write.writerow(row)
     for f in filepaths:
