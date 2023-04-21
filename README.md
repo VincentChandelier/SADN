@@ -78,7 +78,6 @@ python updata.py checkpoint_path -n checkpoint
 ### Test 
 Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test. I re-trained the re-implementation algorithm in PyTorch with lambda=0.003, and the checkpoint is saved as the Code/checkpoint.pth.tar. 
 
-In our original training stage, the algorithm was trained for 100 epochs, the provided checkpoint is only trained for 25 epochs since the re-training time is too long to wait. The checkpoint is provided to explain all the steps in our implementations.
 ```
 python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.tar
 ```
