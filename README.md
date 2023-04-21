@@ -67,7 +67,7 @@ First stage with noise quantization
    ```
 Second stage with straight-through-estimation quantization by loading the lastest checkpoint of stage 1
 ```
-   python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 50 -lr 1e-4 -n 8 --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id 2,3 --savepath   ./checkpoint0003ste --pretrained  --checkpoint ./checkpoint0003/checkpoint_last_69.pth.tar  --ste 1
+   python train.py -d dataset --N 48 --angRes 13 --n_blocks 1 -e 10 -lr 1e-4 -n 8 --lambda 3e-3 --batch-size 8  --test-batch-size 8 --aux-learning-rate 1e-3 --patch-size 832 832 --cuda --save --seed 1926 --gpu-id 2,3 --savepath   ./checkpoint0003ste --pretrained  --checkpoint ./checkpoint0003/checkpoint_last_69.pth.tar  --ste 1
 ```
    The training patches I used for training is available (https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow access code：0uow)
 
