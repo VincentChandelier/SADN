@@ -19,6 +19,7 @@ Light field image becomes one of the most promising media types for immersive vi
 | LFtoolbox0.4 | [LFtoolbox0.4](https://pan.baidu.com/s/1HdzENydi1WKvJ0jL6wS2TA?pwd=v0xj) |
 | Training patches | [Training patches](https://pan.baidu.com/s/1wPLjhdjUY0A8xdLAEdqzEA?pwd=0uow)    |
 | Full-resolution test images | [Full-resolution test images](https://pan.baidu.com/s/14LdMV7ybwEiSauR4DlfiQA?pwd=gf66) |
+| Fixed-rate model of SADN| [Fixed-rate model of SADN](https://drive.google.com/file/d/1Pb-uJw497ho7XxBsWqsOG4c1cwAKXdDc/view?usp=sharing)|
 | Variable Rate models   | [SADN+QVRF](https://github.com/VincentChandelier/SADN-QVRF)|
 
 # PINet： A large scale image dataset of a hand-held light Field camera is proposed
@@ -76,7 +77,7 @@ Second stage with straight-through-estimation quantization by loading the lastes
 python updata.py checkpoint_path -n checkpoint
 ```
 ### Test 
-Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test. I re-trained the re-implementation algorithm in PyTorch with lambda=0.003, and the checkpoint is saved as the Code/checkpoint.pth.tar. 
+Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test. I re-trained the re-implementation algorithm in PyTorch with lambda=0.003, and the checkpoint is available at [Fixed-rate model of SADN](https://drive.google.com/file/d/1Pb-uJw497ho7XxBsWqsOG4c1cwAKXdDc/view?usp=sharing). 
 
 ```
 python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.tar
