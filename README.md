@@ -4,7 +4,7 @@
   
 Kedeng Tong, Xin Jin, Chen Wang, Fan Jiang 
 
-[Poster](https://drive.google.com/file/d/1HCDC7KsgLDEpkr0ZjK7UcliMVnwWK5v0/view?usp=sharing) is available.
+[Poster](https://drive.google.com/file/d/1HCDC7KsgLDEpkr0ZjK7UcliMVnwWK5v0/view?usp=sharing) is available.  
 [Video presentation](https://drive.google.com/file/d/18-lm0xE4gofmfLGLOyv5mW2XAPV87WaQ/view?usp=sharing) is available.
 
 # Paper Summury:
@@ -87,8 +87,11 @@ python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.ta
 .![](https://github.com/VincentChandelier/SADN/blob/main/RDdata/RD.png)
 
 # Notes
-This implementation is not the original code of our ICASSP2022 paper, because the original code is based on Tensorflow 2.4.0 wihch many features have been removed in the latest tensorflow version. This repo is a re-implementation, but the core codes are the same. 
-## original RD data
+- This implementation is not the original code of our ICASSP2022 paper, because the original code is based on Tensorflow 2.4.0 which many features have been removed in the latest TensorFlow version. This repo is a re-implementation, but the core codes are the same. And, the original results are trained on the V100 machine while the retrained models are trained on RTX3090. 
+- Empirically, the same model trained on V100 achieves better compression performance than that on RTX3090 due to equipment calculation accuracy.
+- Original rate-distortion results are supposed to be compared.
+
+## Original RD data
 Our original RD data in the paper is contained in the folder ./RDdata/.
 ## Retrained RD data
 Since our original proposed method is trained on Nvidia V100, Tensorflow 2.4, we retrained our algorithm on Nvidia RTX3090, PyTorch 2.3 using lambda belonging to {0.0001, 0.00015, 0.0003, 0.0006, 0.001, 0.003} for comparison.  
