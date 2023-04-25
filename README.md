@@ -80,7 +80,7 @@ python updata.py checkpoint_path -n checkpoint
 Since the full test images are too large, I only upload a patch of the test image in Code/dataset/test. I re-trained the re-implementation algorithm in PyTorch with lambda=0.003, and the checkpoint is available at [Fixed-rate model of SADN](https://drive.google.com/file/d/1Pb-uJw497ho7XxBsWqsOG4c1cwAKXdDc/view?usp=sharing). 
 
 ```
-python Inference.py --dataset/test --output_path Result_dir -p checkpoint.pth.tar
+python Inference.py --dataset dataset/Fulltest --output_path checkpoint0003  -p checkpoint0003ste.pth.tar
 ```
 
 ## Evaluation Results
