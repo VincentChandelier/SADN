@@ -7,6 +7,10 @@
 # Paper Summury:
 Light field image becomes one of the most promising media types for immersive video applications. In this paper, we propose a novel end-to-end spatial-angular-decorrelated network (SADN) for high-efficiency light field image compression. Different from the existing methods that exploit either spatial or angular consistency in the light field image, SADN decouples the angular and spatial information by dilation convolution and stride convolution in spatialangular interaction, and performs feature fusion to compress spatial and angular information jointly. To train a stable and robust algorithm, a large-scale dataset consisting of 7549 light field images is proposed and built. The proposed method provides 2.137 times and 2.849 times higher compression efficiency relative to H.266/VVC and H.265/HEVC inter coding, respectively. It also outperforms the end-to-end image compression networks by an average of 79.6% bitrate saving with much higher subjective quality and light field consistency. 
 
+## Related links
+ * CompressAI: https://github.com/InterDigitalInc/CompressAI
+ * SADN-QVRF (variable rate model of SADN) : https://github.com/VincentChandelier/SADN-QVRF
+ 
 # Available data
  Data |  Link                                                                                              |
 | ----|---------------------------------------------------------------------------------------------------|
